@@ -11,7 +11,7 @@ driver = webdriver.Chrome()
 
 driver.get("http://seekingalpha.com/market-news")
 
-csv_file = open('news.csv', 'wb')
+csv_file = open('../data/news.csv', 'wb')
 writer = csv.writer(csv_file)
 writer.writerow(['date', 'news'])
 # Page index used to keep track of where we are.
