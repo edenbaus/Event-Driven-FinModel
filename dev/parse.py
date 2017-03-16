@@ -10,21 +10,36 @@ def parse(filename):
 	time=[]
 	comment=[]
 	j=0
+	count=1
 	while j<data.shape[0]:
 		if i==0:
 			title=np.append(title,data.iloc[j,0])
+			print "title ", count, " saved"
 			i=i+1
 		elif i==2:
 			buff=data.iloc[j,0].split('|')
 			if len(buff)==2:
 				time=np.append(time,buff[0])
+				print "time ", count, " saved"
 				comment=np.append(comment,buff[1])
+				print "comment ", count, " saved"
 			else:
 				time=np.append(time,buff[0])
+				print "time ", count, " saved"
 				comment=np.append(comment,'0 Comment')
+				print "comment ", count, " saved"
+			count=count+1
 			i=0
 		else:
+			'|' in data.iloc[j,0]
 			content=np.append(content,data.iloc[j,0])
+			print "content" , count ,"saved"
+			i=i+1
+		j=j+1
+	print "title length is ", len(title)
+	print "content length is ", len(content)
+	print "time length is ", len(time)
+	print "comment length is ", len(comment)
 	dic['title']=title
 	dic['content']=content
 	dic['time']=time
