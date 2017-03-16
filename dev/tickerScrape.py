@@ -15,13 +15,13 @@ print "importing libraries..."
 # Windows users need to specify the path to chrome driver you just downloaded.
 # driver = webdriver.Chrome('path\to\where\you\download\the\chromedriver')
 
-def seekalpha():
-	py3 = version_info[0] > 2 #creates boolean value for test that Python major version > 2
-	if py3:
-		file = input("Please Input Ticker: ")
-	else:
-		file = raw_input("Please Input Ticker: ")
-		
+def seekalpha(ticker):
+	#py3 = version_info[0] > 2 #creates boolean value for test that Python major version > 2
+	#if py3:
+	#	file = input("Please Input Ticker: ")
+	#else:
+	#	file = raw_input("Please Input Ticker: ")
+	file = ticker	
 	file_f = '../data/' + file + '.csv'
 		
 	driver = webdriver.Chrome()
@@ -82,9 +82,6 @@ def seekalpha():
 		# Page index used to keep track of where we are.
 
 
-			
-
-
 # Find all the reviews.
 # 	newsunit = driver.find_elements_by_xpath('//li[@class="mc_list_li"]')
 # 	for nu in newsunit:
@@ -111,5 +108,16 @@ def seekalpha():
 # 			csv_file.close()
 # 			driver.close()
 
-seekalpha()
+def main():
+	tickers = ['BAC','RF','C','CHK','XOM','SLB','FCX','DOW','AA','VZ','VOD','T','AAPL','JNPR','AMAT','JNJ','LLY','ABT','GE','CAT','LMT','MCD','F','BBBY','PG','KO','K','SO','D','PPL']
+	count = 1
+	for ticker in tickers:
+		print str(count) + " of 30"
+		print "Grabbing stock news for: " + ticker
+		print '-'*200 + '\n' + '-'*200
+		seekalpha(ticker)
+		count += 1
+	print '*'*200 +'\n' + '-'*200 + '\nComplete!'
 	
+if __name__ == "__main__":
+	main()
