@@ -22,7 +22,7 @@ def seekalpha():
 	else:
 		file = raw_input("Please Input Ticker: ")
 		
-	file_f = file + '.csv'
+	file_f = '../data/' + file + '.csv'
 		
 	driver = webdriver.Chrome()
 	url="http://seekingalpha.com/symbol/" + file + "/news"
@@ -33,14 +33,14 @@ def seekalpha():
 	match=False
 	i=1
 	
-	with open(file_f, 'a') as f:
+	with open(file_f, 'w') as f:
 		f.write("Date|")
 		f.write("Headline|")
 		while match==False and i<10000:
 			soup = BeautifulSoup(driver.page_source, 'lxml')
 			news = soup.findAll("li",{"class":"mc_list_li"})
 			try:
-				print news[~0].contents[1].text.strip('\n')
+				#print news[~0].contents[1].text.strip('\n')
 				print news[~0].contents[3].text.strip('\n').split("|")[0].strip() + '\n'
 				#print news[~0].contents[3].contents[1].text.strip('\n').strip() + '\n'
 				#print 'length of news[~0]... ' + len(news[~0].contents)
