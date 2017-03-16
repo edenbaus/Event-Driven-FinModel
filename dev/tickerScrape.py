@@ -41,7 +41,10 @@ def seekalpha():
 			news = soup.findAll("li",{"class":"mc_list_li"})
 			try:
 				print news[~0].contents[1].text.strip('\n')
-				print news[~0].contents[3].contents[1].text.strip('\n').strip() + '\n'
+				print news[~0].contents[3].text.strip('\n').split("|")[0].strip() + '\n'
+				#print news[~0].contents[3].contents[1].text.strip('\n').strip() + '\n'
+				#print 'length of news[~0]... ' + len(news[~0].contents)
+				
 			except Exception, e:
 				e
 				print "error..."
@@ -59,10 +62,12 @@ def seekalpha():
 				x = 0
 				N = len(news)
 				while (x < N):
-					print news[x].contents[1].text.strip('\n')
-					print news[x].contents[3].contents[1].text.strip('\n').strip() + '\n'
+					#print news[x].contents[1].text.strip('\n')
+					#print news[x].contents[3].contents[1].text.strip('\n').strip() + '\n'
+					print news[x].contents[3].text.strip('\n').split("|")[0].strip() + '\n'
 					f.write(news[x].contents[1].text.encode('utf-8').strip('\n')+"|")
-					f.write(news[x].contents[3].contents[1].text.encode('utf-8').strip('\n').strip()+"|")
+					#f.write(news[x].contents[3].contents[1].text.encode('utf-8').strip('\n').strip()+"|")
+					f.write(news[x].contents[3].text.encode('utf-8').strip('\n').split("|")[0].strip() + "|")
 					x +=1
 					if x == N:
 						break
