@@ -1,0 +1,1 @@
+/Users/gaoxu/DataSci/Event-Driven-FinModel/dev/single_news.txt	1	Market	has not fully rewarded	some Trump-trade winners	0	1	1	5	5	8	0.9652340062890291	Market has not fully rewarded some Trump-trade winners , Jefferies says .	NN VBZ RB RB VBN DT NNP NNS , NNP VBZ .	B-NP B-VP I-VP I-VP I-VP B-NP I-NP I-NP O B-NP B-VP O	market	reward	some trump-trade winners
