@@ -13,7 +13,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 
 batch_size = 128
-num_classes = 5
+num_classes = 2
 epochs = 12
 
 # input image dimensions
