@@ -1,13 +1,15 @@
 ### this file is used to add sentiment polarity in existing dataframe
 ### input: pandas dataframe with date, news title, news content 
 
-import pandas 
+import pandas as pd
 from textblob import TextBlob
 import sys  
+import datetime as dt
+from dateutil.parser import parse
 reload(sys)  
 sys.setdefaultencoding('utf8')
 def senti():
-	data=parse()
+	data=parse_1()
 	Polarity = map(lambda x: TextBlob(x),data.content)
 	result=[]
 	for i in range(len(Polarity)):
@@ -18,9 +20,9 @@ def senti():
 	####################transform data to standard structure###############
 	return data
 
-def parse():
-	Ticker=rawinput('please input ticker')
-	data=open(Ticker+'.csv')
+def parse_1():
+	Ticker=raw_input('please input ticker')
+	data=open('../data/'+Ticker+'.csv')
 	array=data.read().split('|')
 	date=[]
 	content=[]
@@ -44,11 +46,19 @@ def date_transform(df):
 	real_date=[]
 	for i in range(len(date)):
 		if any(word in date[i] for word in year):
+			d=date[i].split(',')[0]+date[i].split(',')[1]
+			dat=parse(d).strftime('%-m/%-d/%y')
 		####has year#####
-			real_date.append(date[i].split(',')[0]+date[i].split(',')[1])
+			real_date.append(dat)
 		else:
-			real_date.append(date[i].split(',')[1]+' 2017')
+			d=date[i].split(',')[1]+' 2017'
+			dat=parse(d).strftime('%-m/%-d/%y')
+			real_date.append(dat)
+	j=0
+	while ':' in real_date[j]:
+		j=j+1
 	df.date=real_date
+	df=df.iloc[j:,:]
 	return df
 
 

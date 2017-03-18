@@ -15,7 +15,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import PReLU
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.utils.np_utils import to_categorical
-from sentiment import parse, date_transform
+from sentiment import parse_1, date_transform, senti
 
 ####################need x_train, y_train, x_test, y_test, traintest_X##################
 def NN():
@@ -128,5 +128,14 @@ def NN():
 
 
 def traintest():
-	
+	df=senti()
+	df.drop('content',axis=1,inplace=True)
+	market_data=pd.read_csv('table.csv',header=0)
+	df_1=market_data.merge(df,how='left',left_on='Date',right_on='date')
+	df_1.drop('date',axis=1,inplace=True)
+	df_1=df_1.fillna(0)
+	print df_1
+
+
+traintest()
 
