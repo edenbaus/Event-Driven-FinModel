@@ -35,7 +35,11 @@ def seekalpha():
 	
 	with open(file_f, 'a') as f:
 		f.write("Date|")
+<<<<<<< HEAD
 		f.write("Headline|")
+=======
+		f.write("1stPara|")
+>>>>>>> dbbe4325154f9312834594c717056ac6e6ec0b31
 		while match==False and i<10000:
 			soup = BeautifulSoup(driver.page_source, 'lxml')
 			news = soup.findAll("li",{"class":"mc_list_li"})
@@ -56,6 +60,10 @@ def seekalpha():
 				print 'FULL LIST' + '\n\n\n'
 			
 				#for i in len(news):
+<<<<<<< HEAD
+=======
+
+>>>>>>> dbbe4325154f9312834594c717056ac6e6ec0b31
 				x = 0
 				N = len(news)
 				while (x < N):
