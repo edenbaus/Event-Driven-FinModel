@@ -18,7 +18,14 @@ from keras.utils.np_utils import to_categorical
 from sentiment import parse_1, date_transform, senti
 
 ####################need x_train, y_train, x_test, y_test, traintest_X##################
-def NN():
+def NN(df):
+	traintest=df.loc[:,['1','2','3','4','polarity']]
+	y=df.loc[:,'y']
+	train_size=int(0.8*traintest.shape[0])
+	x_train=traintest.iloc[-train_size:,:]
+	x_test=traintest.iloc[:(traintest.shape[0]-train_size),:]
+	y_train=y.iloc[-train_size:]
+	y_test=y.iloc[:(traintest.shape[0]-train_size)]
 	train_X = x_train.as_matrix()
 	test_X = x_test.as_matrix()
 	print "before scalar train size",train_X.shape
@@ -50,6 +57,7 @@ def NN():
 	do_all = True
 	## cv-folds
 	nfolds = 10
+	print "model created then fold"
 	if do_all:
 		if nfolds>1:
 			folds = KFold(int(len(train_y)), n_folds = nfolds, shuffle = True, random_state = 111)
@@ -134,7 +142,11 @@ def traintest():
 	df_1=market_data.merge(df,how='left',left_on='Date',right_on='date')
 	df_1.drop('date',axis=1,inplace=True)
 	df_1=df_1.fillna(0)
-	print df_1
+	df_1.y=map(lambda x:1 if x>0 else 0,df_1.y)
+	print "dataset created"
+	NN(df_1)
+
+
 
 
 traintest()
