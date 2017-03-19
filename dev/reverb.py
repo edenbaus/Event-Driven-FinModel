@@ -16,23 +16,22 @@ def reverb():
 	for each_news in news:
 		delimiters=".","?","!","\n\n"
 		regexPattern = '|'.join(map(re.escape, delimiters))
-		news_list=re.split(regexPattern,each_news)
-		print len(news_list)
-		news=filter(lambda x: (ticker in x) or (company_name in x), news_list)
-		if len(news)==0:
-			info=''
-		else:
-			news=news[0]
-			print news
-			f=open("single_news.txt",'w')
-			f.write(news)
-			f.close()
-			os.system("java -Xmx512m -jar reverb-latest.jar single_news.txt > output.txt")
-			output=open("output.txt",'r')
-			info=output.read()
-			output.close()
+		#news_list=re.split(regexPattern,each_news)
+		#print len(news_list)
+		#news=filter(lambda x: (ticker in x) or (company_name in x), news_list)
+
+	
+		news=each_news+'.'
+		print news
+		f=open("single_news.txt",'w')
+		f.write(news)
+		f.close()
+		os.system("java -Xmx512m -jar reverb-latest.jar single_news.txt > output.txt")
+		output=open("output.txt",'r')
+		info=output.read()
+		output.close()
 		print info
-		info_list=info.split(' ')
+		
 
 		reverb=np.append(reverb,info)
 	os.system("rm single_news.txt")
