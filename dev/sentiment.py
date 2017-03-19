@@ -9,7 +9,7 @@ from dateutil.parser import parse
 reload(sys)  
 sys.setdefaultencoding('utf8')
 def senti():
-	data=parse_1()
+	ticker, data=parse_1()
 	Polarity = map(lambda x: TextBlob(x),data.content)
 	result=[]
 	for i in range(len(Polarity)):
@@ -35,7 +35,7 @@ def parse_1():
 	dic['date']=date
 	dic['content']=content
 	df=pd.DataFrame(dic)
-	return df
+	return Ticker,df
 
 def date_transform(df):
 	date=df.date

@@ -6,51 +6,23 @@ import pandas as pd
 import numpy as np
 from nltk import tokenize
 import re
-def parse(filename):
-	txt_file=open(filename,'r')
-	txt=open("new.txt",'w')
-	info=txt_file.read()
-	
-	info=txt.read()
-
-	section=info.split('|')
-	i=1
-	date=[]
-	news=[]
-	for s in section:
-		if i==1:
-			date=np.append(date,s)
-			print 'date '+s+'\n'
-			i=2
-		else:
-			news_line=s.split('\n')
-			j=-2
-			while len(news_line[j])==0:
-				j=j-1
-			line=news_line[j]
-			print 'news: '+news_line[j]+'\n'
-			news=np.append(news,line)
-			i=1
-	df={}
-	df['date']=date
-	df['news']=news
-	df=pd.DataFrame(df)
-	df.to_csv("../data/db.csv")
-	txt.close()
+from sentiment import parse_1
 
 def reverb():
-	
-	
-	filename = raw_input("Please Input filename: ")
-	data=pd.read_csv(filename,header=-1)
-	news=data.iloc[:,2].dropna()
+	ticker, df=parse_1()
+	news=df.content
 	reverb=[]
+	company_name= raw_input("please enter company name")
 	for each_news in news:
-		print each_news
-		news_line=filter(lambda x: "BAC" in x, each_news.split())[0]
-		text_file = open("single_news.txt", "w")
-		text_file.write(news_line)
-		text_file.close()
+		delimiters=".","?","!","\n\n"
+		regexPattern = '|'.join(map(re.escape, delimiters))
+		news_list=re.split(regexPattern,each_news)
+		print len(news_list)
+		news=filter(lambda x: (ticker in x) or (company_name in x), news_list)[0]
+		print news
+		f=open("single_news.txt",'w')
+		f.write(news)
+		f.close()
 		os.system("java -Xmx512m -jar reverb-latest.jar single_news.txt > output.txt")
 		output=open("output.txt",'r')
 		info=output.read()
@@ -61,11 +33,10 @@ def reverb():
 		reverb=np.append(reverb,info)
 	os.system("rm single_news.txt")
 	os.system("rm output.txt")
-	data['reverb']=reverb
-	data.to_csv("afterprocess.csv")
-
-parse("../data/C.txt")
-
+	df['reverb']=reverb
+	df.to_csv(ticker+"reverb.csv")
+	
+reverb()
 
 
 

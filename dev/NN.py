@@ -19,7 +19,7 @@ from sentiment import parse_1, date_transform, senti
 from sklearn.metrics import accuracy_score
 
 ####################need x_train, y_train, x_test, y_test, traintest_X##################
-def NN(df):
+def NN(df,fir,sec):
 	traintest=df.loc[:,['1','2','3','4','polarity']]
 	y=df.loc[:,'y']
 	train_size=int(0.8*traintest.shape[0])
@@ -43,10 +43,10 @@ def NN(df):
 	## neural net
 	def nn_model():
 		model = Sequential()   
-		model.add(Dense(300, input_dim = train_X.shape[1], init = 'he_normal', activation='sigmoid'))
+		model.add(Dense(fir, input_dim = train_X.shape[1], init = 'he_normal', activation='tanh'))
 		model.add(BatchNormalization())
 		model.add(PReLU())  
-		model.add(Dense(50, init = 'he_normal', activation='sigmoid'))
+		model.add(Dense(sec, init = 'he_normal', activation='tanh'))
 		model.add(BatchNormalization())    
 		model.add(PReLU())	
 		model.add(Dense(1, init = 'he_normal', activation='sigmoid'))
@@ -68,7 +68,7 @@ def NN(df):
 	print "-"*100
 
 	## train models
-	nbags = 3
+	nbags = 5
 
 	from time import time
 	import datetime
@@ -92,26 +92,33 @@ def NN(df):
 		print "pred_train dimension is" , pred_train.shape
 		print "train_X dimension is" , train_X.shape
 		print(str(datetime.timedelta(seconds=time()-begintime)))
-	pred_test=pred_test/3
-	pred_train=pred_train/3
+	pred_test=pred_test/nbags
+	pred_train=pred_train/nbags
 	pred_test=map(lambda x: 1 if x>0.5 else 0, pred_test)
 	pred_train=map(lambda x: 1 if x>0.5 else 0, pred_train)
 
 	print "train accuracy is " , accuracy_score(y_train,pred_train)
 	print "test accuracy is ", accuracy_score(y_test, pred_test)
+	return abs(accuracy_score(y_train,pred_train)-accuracy_score(y_test, pred_test))
 
 
 def traintest():
 	df=senti()
 	df.drop('content',axis=1,inplace=True)
 	market_data=pd.read_csv('table.csv',header=0)
-	df_1=market_data.merge(df,how='left',left_on='Date',right_on='date')
+	df_1=market_data.merge(df,how='right',left_on='Date',right_on='date')
 	df_1.drop('date',axis=1,inplace=True)
 	df_1=df_1.fillna(0)
 	df_1.y=map(lambda x:1 if x>0 else 0,df_1.y)
 	print "dataset created"
-	NN(df_1)
 
+	NN(df_1,300,50)
+	#map_result={}
+	#first_hidden=range(10,310,10)
+	#second_hidden=range(10,310,10)
+	#for fir in first_hidden:
+		#for sec in second_hidden:
+			#map_result[(fir,sec)]=NN(df_1,fir,sec)
 
 
 

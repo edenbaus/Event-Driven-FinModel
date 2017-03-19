@@ -11,10 +11,10 @@ def make_timeseries_regressor(window_size, filter_length, nb_input_series=1, nb_
 
     model = Sequential((
 
-        Convolution1D(nb_filter=nb_filter, filter_length=filter_length, activation='relu', input_shape=(window_size, nb_input_series)),
+        Convolution1D(nb_filter=nb_filter, filter_length=filter_length, activation='relu', input_shape=(nb_input_series)),
         MaxPooling1D(),     # Downsample the output of convolution by 2X.
-       # Convolution1D(nb_filter=nb_filter, filter_length=filter_length, activation='relu'),
-       # MaxPooling1D(),
+        Convolution1D(nb_filter=nb_filter, filter_length=filter_length, activation='relu'),
+        MaxPooling1D(),
         Flatten(),
         Dense(nb_outputs, activation='sigmoid'),     # For binary classification, change the activation to 'sigmoid'
     ))
