@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import csv
 import random
-import lxml
+#import lxml
 from bs4 import BeautifulSoup
 
 print "importing libraries..."
