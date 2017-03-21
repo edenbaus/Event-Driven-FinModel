@@ -60,7 +60,7 @@ def reverb_parse(info):
 	if len(reverb_list)==0:
 		confidence=0
 		subject=''
-		verb=''
+		verb_=''
 		object_=''
 	else:
 		for i in range(len(reverb_list)-1):
@@ -72,7 +72,7 @@ def reverb_parse(info):
 		if len(confi)==0:
 			confidence=0
 			subject=''
-			verb=''
+			verb_=''
 			object_=''
 		else:
 			idx=np.argmax(confi)
