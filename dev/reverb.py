@@ -69,12 +69,19 @@ def reverb_parse(info):
 			sub.append(buf[-3])
 			verb.append(buf[-2])
 			obj.append(buf[-1])
-		idx=np.argmax(confi)
-		confidence=confi[idx]
-		subject=sub[idx]
-		object_=obj[idx]
-		print "finish this news"
-	return confidence,subject,object_,verb
+		if len(confi)==0:
+			confidence=0
+			subject=''
+			verb=''
+			object_=''
+		else:
+			idx=np.argmax(confi)
+			confidence=confi[idx]
+			subject=sub[idx]
+			object_=obj[idx]
+			verb_=verb[idx]
+			print "finish this news"
+	return confidence,subject,object_,verb_
 
 reverb()
 
