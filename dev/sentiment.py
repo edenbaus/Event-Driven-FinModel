@@ -17,8 +17,8 @@ def senti():
 		result.append(k)
 	data['polarity']=result
 	df=date_transform(data)
-	####################transform data to standard structure###############
-	return data
+	####################transform date to standard structure###############
+	return ticker,data
 
 def parse_1():
 	Ticker=raw_input('please input ticker: ')
@@ -26,19 +26,24 @@ def parse_1():
 	array=data.read().split('|')
 	date=[]
 	content=[]
+	d=0
 	for i in range(2,len(array)-1):
-		if len(array[i])<30:
+		if d==0:
 			date.append(array[i])
+			d=1
 		else:
 			content.append(array[i])
+			d=0
 	dic={}
-	dic['date']=date
+	dic['Date']=date
+	print "date length",len(date)
 	dic['content']=content
+	print "content length", len(content)
 	df=pd.DataFrame(dic)
 	return Ticker,df
 
 def date_transform(df):
-	date=df.date
+	date=df.Date
 	y=range(2007,2017)
 	year=map(lambda x: str(x), y)
 
@@ -57,7 +62,7 @@ def date_transform(df):
 	j=0
 	while ':' in real_date[j]:
 		j=j+1
-	df.date=real_date
+	df.Date=real_date
 	df=df.iloc[j:,:]
 	return df
 

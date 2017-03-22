@@ -19,9 +19,9 @@ from sentiment import parse_1, date_transform, senti
 from sklearn.metrics import accuracy_score
 
 ####################need x_train, y_train, x_test, y_test, traintest_X##################
-def NN(df,fir,sec):
-	traintest=df.loc[:,['1','2','3','4','polarity']]
-	y=df.loc[:,'y']
+def NN(df,fir,sec,ticker):
+	traintest=df.ix[:, df.columns != 'return_y']
+	y=df.loc[:,'return_y']
 	train_size=int(0.8*traintest.shape[0])
 	x_train=traintest.iloc[-train_size:,:]
 	x_test=traintest.iloc[:(traintest.shape[0]-train_size),:]
@@ -97,22 +97,35 @@ def NN(df,fir,sec):
 	pred_test=map(lambda x: 1 if x>0.5 else 0, pred_test)
 	pred_train=map(lambda x: 1 if x>0.5 else 0, pred_train)
 
-	print "train accuracy is " , accuracy_score(y_train,pred_train)
-	print "test accuracy is ", accuracy_score(y_test, pred_test)
+	train_result="train accuracy is " +str(accuracy_score(y_train,pred_train))
+	test_result="test accuracy is "+ str(accuracy_score(y_test, pred_test))
+
+	print train_result
+	print test_result
+	f=open('../data/SimpleNN/'+ticker+'.txt','w')
+	f.write(train_result)
+	f.write(test_result)
+	f.close()
 	return abs(accuracy_score(y_train,pred_train)-accuracy_score(y_test, pred_test))
 
 
+
 def traintest():
-	df=senti()
+	ticker,df=senti()
 	df.drop('content',axis=1,inplace=True)
-	market_data=pd.read_csv('table.csv',header=0)
-	df_1=market_data.merge(df,how='right',left_on='Date',right_on='date')
-	df_1.drop('date',axis=1,inplace=True)
-	df_1=df_1.fillna(0)
-	df_1.y=map(lambda x:1 if x>0 else 0,df_1.y)
+	print "sentiment columns are", df.columns
+	market_data=pd.read_csv('../data/Price/'+ticker+'.csv',header=0)
+	###transform the market to time series lag 5, merge with common data(already returns)
+	TSdf_=TSdf(market_data)
+	final=TSdf_.merge(df,how='left',on='Date').fillna(0)
+	print "final columns are", final.columns
+	print "Any NAN in final ", final.polarity.isnull().any().any()
+	final.drop('Date',axis=1,inplace=True)
+
+
 	print "dataset created"
 
-	NN(df_1,300,50)
+	NN(final,300,50,ticker)
 	#map_result={}
 	#first_hidden=range(10,310,10)
 	#second_hidden=range(10,310,10)
@@ -120,7 +133,30 @@ def traintest():
 		#for sec in second_hidden:
 			#map_result[(fir,sec)]=NN(df_1,fir,sec)
 
-
+def TSdf(market_data):#time series lag 5 data
+	return_=[]
+	for i in range(market_data.shape[0]-1):
+	    return_.append(market_data.iloc[i+1,1]/market_data.iloc[i,1]-1.0)
+	date=market_data.Date[1:]
+	df={}
+	return_5=return_[:-5]
+	return_4=return_[1:-4]
+	return_3=return_[2:-3]
+	return_2=return_[3:-2]
+	return_1=return_[4:-1]
+	return_y=return_[5:]
+	df['return_5']=return_5
+	df['return_4']=return_4
+	df['return_3']=return_3
+	df['return_2']=return_2
+	df['return_1']=return_1
+	df['return_y']=map(lambda x: 1 if x>=0 else 0,return_y)
+	df['Date']=date[5:]
+	dataframe=pd.DataFrame(df)
+	common_data=pd.read_csv('../data/Price/common_data.csv',header=0)
+	final=dataframe.merge(common_data,how='left',on='Date')
+	return final
+	
 
 traintest()
 
