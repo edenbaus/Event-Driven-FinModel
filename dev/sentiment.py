@@ -21,7 +21,7 @@ def senti():
 	return data
 
 def parse_1():
-	Ticker=raw_input('please input ticker')
+	Ticker=raw_input('please input ticker: ')
 	data=open('../data/'+Ticker+'.csv')
 	array=data.read().split('|')
 	date=[]
