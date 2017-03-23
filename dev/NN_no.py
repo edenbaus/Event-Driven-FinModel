@@ -99,7 +99,7 @@ def NN(df,fir,sec,ticker):
 
 	print train_result
 	print test_result
-	f=open('../data/SimpleNN/'+ticker+'.txt','w')
+	f=open('../data/nn_no/'+ticker+'.txt','w')
 	f.write(train_result)
 	f.write(test_result)
 	f.close()
@@ -108,31 +108,24 @@ def NN(df,fir,sec,ticker):
 
 
 def traintest():
-	ticker,df=senti()
-	df.drop('content',axis=1,inplace=True)
-	print "sentiment columns are", df.columns
-	market_data=pd.read_csv('../data/Price/'+ticker+'.csv',header=0)
 	###transform the market to time series lag 5, merge with common data(already returns)
+	ticker=raw_input("please input ticker")
+	market_data=pd.read_csv('../data/Price/'+ticker+'.csv',header=0)
 	TSdf_=TSdf(market_data)
-	final=TSdf_.merge(df,how='left',on='Date').fillna(0)
+	final=TSdf_
 	print "final columns are", final.columns
-	print "Any NAN in final ", final.polarity.isnull().any().any()
 	final.drop('Date',axis=1,inplace=True)
 
 
 	print "dataset created"
 
-	# map_result={}
-	# first_hidden=range(10,100,10)
-	# second_hidden=range(10,100,10)
-	# for fir in first_hidden:
-	# 	for sec in second_hidden:
-	# 		map_result[(fir,sec)]=NN(final,fir,sec,ticker)
-	# best_strc= min(map_result, key=map_result.get)
-	# print "best structure is ", best_strc
-	# NN(final,best_strc[0],best_strc[1],ticker)
-	NN(final,50,100,ticker)
-
+	NN(final,300,50,ticker)
+	#map_result={}
+	#first_hidden=range(10,310,10)
+	#second_hidden=range(10,310,10)
+	#for fir in first_hidden:
+		#for sec in second_hidden:
+			#map_result[(fir,sec)]=NN(df_1,fir,sec)
 
 def TSdf(market_data):#time series lag 5 data
 	return_=[]
