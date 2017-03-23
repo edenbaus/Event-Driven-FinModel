@@ -1,3 +1,7 @@
+from gensim.models import doc2vec 
+import nltk 
+import re 
+from sentiment import parse_1, date_transform
 import os
 import sys
 import operator
@@ -8,17 +12,40 @@ from sklearn import model_selection, preprocessing, ensemble
 from sklearn.metrics import log_loss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy.stats import zscore
-from sklearn.cross_validation import KFold
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
 from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import PReLU
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.utils.np_utils import to_categorical
-from sentiment import parse_1, date_transform, senti
 from sklearn.metrics import accuracy_score
+def split_sentence(sentence): 
+	return re.split('\W+', sentence) 
+class MyDocs(object): 
+	def __init__(self,doc1):
+		self.doc1=doc1
+	def __iter__(self):
+		for i, text in enumerate(self.doc1): 
+			yield doc2vec.LabeledSentence(words=split_sentence(text), tags=['%s' % i]) 
 
-####################need x_train, y_train, x_test, y_test, traintest_X##################
+
+def main_():
+	ticker,df=parse_1()
+	df=date_transform(df)
+	mydocs=MyDocs(df.content)
+	model = doc2vec.Doc2Vec(mydocs, size = 100, window = 8, min_count = 1, workers = 4) 
+	lis=[]
+	for news in df.content:
+		lis.append(model.infer_vector(news))
+	df_1=pd.DataFrame(lis)
+	df_1['Date']=df.Date
+	print df_1.shape[1]
+	market_data=pd.read_csv('../data/Price/'+ticker+'.csv',header=0)
+	TSdf_=TSdf(market_data)
+	final=TSdf_.merge(df_1,how='left',on='Date').fillna(0)
+	final.drop('Date',axis=1,inplace=True)
+	print "final dimension is ", final.shape
+	NN(final,300,50,ticker)
+
 def NN(df,fir,sec,ticker):
 	traintest=df.ix[:, df.columns != 'return_y']
 	y=df.loc[:,'return_y']
@@ -99,40 +126,11 @@ def NN(df,fir,sec,ticker):
 
 	print train_result
 	print test_result
-	f=open('../data/SimpleNN/'+ticker+'.txt','w')
+	f=open('../data/Doc2vec/'+ticker+'.txt','w')
 	f.write(train_result)
 	f.write(test_result)
 	f.close()
 	return abs(accuracy_score(y_train,pred_train)-accuracy_score(y_test, pred_test))
-
-
-
-def traintest():
-	ticker,df=senti()
-	df.drop('content',axis=1,inplace=True)
-	print "sentiment columns are", df.columns
-	market_data=pd.read_csv('../data/Price/'+ticker+'.csv',header=0)
-	###transform the market to time series lag 5, merge with common data(already returns)
-	TSdf_=TSdf(market_data)
-	final=TSdf_.merge(df,how='left',on='Date').fillna(0)
-	print "final columns are", final.columns
-	print "Any NAN in final ", final.polarity.isnull().any().any()
-	final.drop('Date',axis=1,inplace=True)
-
-
-	print "dataset created"
-
-	# map_result={}
-	# first_hidden=range(10,310,10)
-	# second_hidden=range(10,310,10)
-	# for fir in first_hidden:
-	# 	for sec in second_hidden:
-	# 		map_result[(fir,sec)]=NN(final,fir,sec,ticker)
-	# best_strc= min(map_result, key=map_result.get)
-	# print "best structure is ", best_strc
-	# NN(final,best_strc[0],best_strc[1],ticker)
-	NN(final,300,50,ticker)
-
 
 def TSdf(market_data):#time series lag 5 data
 	return_=[]
@@ -157,7 +155,4 @@ def TSdf(market_data):#time series lag 5 data
 	common_data=pd.read_csv('../data/Price/common_data.csv',header=0)
 	final=dataframe.merge(common_data,how='left',on='Date')
 	return final
-	
-
-traintest()
-
+main_()
