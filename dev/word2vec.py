@@ -1,4 +1,6 @@
-from gensim.models import doc2vec 
+####this file is used to do word2vec#########
+from gensim.models import Word2Vec
+import pandas as pd
 import nltk 
 import re 
 from sentiment import parse_1, date_transform
@@ -6,10 +8,8 @@ import os
 import sys
 import operator
 import numpy as np
-import pandas as pd
-from scipy import sparse
+
 from sklearn import model_selection, preprocessing, ensemble
-from sklearn.metrics import log_loss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy.stats import zscore
 from keras.models import Sequential
@@ -18,41 +18,78 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import PReLU
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.metrics import accuracy_score
-def split_sentence(sentence): 
-	return re.split('\W+', sentence) 
-class MyDocs(object): 
-	def __init__(self,doc1):
-		self.doc1=doc1
-	def __iter__(self):
-		for i, text in enumerate(self.doc1): 
-			yield doc2vec.LabeledSentence(words=split_sentence(text), tags=['%s' % i]) 
+def trainset(df):
+	all_sentence=[]
+	for i in range(df.shape[0]):
+		sentence=[]
+		for j in range(df.shape[1]):
+			string=str(df.iloc[i,j])
+			if len(string)!=0:
+				sentence+=string.split(' ')
+		all_sentence.append(sentence)
+	return all_sentence
 
+def all_trainset():
+	TickerList=["AA","AAPL","ABT","AMAT","BAC","BBBY","C","CAT","CHK","D","DOW","F","FCX","GE","JNJ","JNPR","K",\
+			"KO","LLY","LMT","MCD","PG","PPL","RF","SLB","SO","T","VOD","VZ","XOM"]
+	all_trainset=[]
+	for ticker in TickerList:
+		data=pd.read_csv('../data/reverb/'+ticker+'reverb.csv',header=0)
+		df=data.loc[:,['subject','object','verb']].fillna('')
+		all_trainset+=trainset(df)
+	return all_trainset
 
-def main_():
-	ticker,df=parse_1()
-	df=date_transform(df)
-	mydocs=MyDocs(df.content)
-	model = doc2vec.Doc2Vec(mydocs, size = 100, window = 8, min_count = 1, workers = 4) 
-	lis=[]
-	for news in df.content:
-		lis.append(model.infer_vector(news))
-	df_1=pd.DataFrame(lis)
-	df_1['Date']=df.Date
-	print df_1.shape[1]
+def TSdf(market_data):#time series lag 5 data
+	return_=[]
+	for i in range(market_data.shape[0]-1):
+		return_.append(market_data.iloc[i+1,1]/market_data.iloc[i,1]-1.0)
+	date=market_data.Date[1:]
+	df={}
+	return_5=return_[:-5]
+	return_4=return_[1:-4]
+	return_3=return_[2:-3]
+	return_2=return_[3:-2]
+	return_1=return_[4:-1]
+	return_y=return_[5:]
+	df['return_5']=return_5
+	df['return_4']=return_4
+	df['return_3']=return_3
+	df['return_2']=return_2
+	df['return_1']=return_1
+	df['return_y']=map(lambda x: 1 if x>=0 else 0,return_y)
+	df['Date']=date[5:]
+	dataframe=pd.DataFrame(df)
+	common_data=pd.read_csv('../data/Price/common_data.csv',header=0)
+	final=dataframe.merge(common_data,how='left',on='Date')
+	return final
+
+def main():
+	print "This is word2vec with Neural Network training.\n"
+	ticker=raw_input("please input ticker")
+	train_set=all_trainset()
+	data=pd.read_csv('../data/reverb/'+ticker+'reverb.csv',header=0)
+	data['Date']=data.date
+	df=data.loc[:,['subject','object','verb']].fillna('')
+	test_set=trainset(df)
+	model = Word2Vec(train_set, min_count=1,window=4,size=100,workers=4)
+	print "word2vec model created"
+	AllLis=[]
+	for each in train_set:
+		lis=[0]*100
+		if len(each)!=0:
+			for each_word in each:
+				lis+=model.wv[each_word]
+			lis/=len(each)
+		AllLis.append(lis)
+	vectors=pd.DataFrame(AllLis)
+	vectors['Date']=date_transform(data).Date
 	market_data=pd.read_csv('../data/Price/'+ticker+'.csv',header=0)
 	TSdf_=TSdf(market_data)
-	final=TSdf_.merge(df_1,how='left',on='Date').fillna(0)
+	final=TSdf_.merge(vectors,how='left',on='Date').fillna(0)
 	final.drop('Date',axis=1,inplace=True)
-	print "final dimension is ", final.shape
-	y_test,pred_test=NN(final,300,50,ticker,"Doc2vec")
-	Y=open("../data/graph/"+ticker+'/Y_test.txt','w')
-	P=open("../data/graph/"+ticker+'/partpred_test.txt','w')
-	Y.write(y_test)
-	P.write(pred_test)
-	Y.close()
-	P.close()
-
-
+	print "final dataset created"
+	print "final columns are ", final.columns
+	y_test,pred_test=NN(final,300,50,ticker,"Word2VecAll")
 
 def NN(df,fir,sec,ticker,folder):
 	traintest=df.ix[:, df.columns != 'return_y']
@@ -140,85 +177,11 @@ def NN(df,fir,sec,ticker,folder):
 	f.close()
 	return y_test,pred_test
 
-def TSdf(market_data):#time series lag 5 data
-	return_=[]
-	for i in range(market_data.shape[0]-1):
-		return_.append(market_data.iloc[i+1,1]/market_data.iloc[i,1]-1.0)
-	date=market_data.Date[1:]
-	df={}
-	return_5=return_[:-5]
-	return_4=return_[1:-4]
-	return_3=return_[2:-3]
-	return_2=return_[3:-2]
-	return_1=return_[4:-1]
-	return_y=return_[5:]
-	df['return_5']=return_5
-	df['return_4']=return_4
-	df['return_3']=return_3
-	df['return_2']=return_2
-	df['return_1']=return_1
-	df['return_y']=map(lambda x: 1 if x>=0 else 0,return_y)
-	df['Date']=date[5:]
-	dataframe=pd.DataFrame(df)
-	common_data=pd.read_csv('../data/Price/common_data.csv',header=0)
-	final=dataframe.merge(common_data,how='left',on='Date')
-	return final
-
-def main_all():
-	TickerList=["AA","AAPL","ABT","AMAT","BAC","BBBY","C","CAT","CHK","D","DOW","F","FCX","GE","JNJ","JNPR","K",\
-				"KO","LLY","LMT","MCD","PG","PPL","RF","SLB","SO","T","VOD","VZ","XOM"]
-	all_news=[]
-	for ticker in TickerList:
-		all_news.append(list(parse_2(ticker).content))
-	mydocs=MyDocs(pd.DataFrame(all_news).iloc[:,0])
-	model = doc2vec.Doc2Vec(mydocs, size = 100, window = 4, min_count = 1, workers = 4) 
-	ticker,df=parse_1()
-	df=date_transform(df)
-	lis=[]
-	for news in df.content:
-		lis.append(model.infer_vector(news))
-	df_1=pd.DataFrame(lis)
-	df_1['Date']=df.Date
-	print df_1.shape[1]
-	market_data=pd.read_csv('../data/Price/'+ticker+'.csv',header=0)
-	TSdf_=TSdf(market_data)
-	final=TSdf_.merge(df_1,how='left',on='Date').fillna(0)
-	final.drop('Date',axis=1,inplace=True)
-	print "final dimension is ", final.shape
-	y_test,pred_test=NN(final,300,50,ticker,"Doc2VecAll")
-	Y=pd.DataFrame(y_test)
-	Y.to_csv("../data/graph/"+ticker+"/y_test.csv")
-	P=pd.DataFrame(pred_test)
-	P.to_csv("../data/graph/"+ticker+'/allpred_test.csv')
-	
-
-def parse_2(Ticker):
-	data=open('../data/'+Ticker+'.csv')
-	array=data.read().split('|')
-	date=[]
-	content=[]
-	d=0
-	for i in range(2,len(array)-1):
-		if d==0:
-			date.append(array[i])
-			d=1
-		else:
-			content.append(array[i])
-			d=0
-	dic={}
-	dic['Date']=date
-	dic['content']=content
-	df=pd.DataFrame(dic)
-	return df	
+main()
 
 
-def true_main():
-	Option=raw_input("input 1 for part training, 2 for all training")
-	if Option=='1':
-		main_()
-	elif Option=='2':
-		main_all()
-	else:
-		print "wrong input"
 
-true_main()
+
+
+
+
