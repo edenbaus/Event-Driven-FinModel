@@ -45,13 +45,10 @@ def main_():
 	final.drop('Date',axis=1,inplace=True)
 	print "final dimension is ", final.shape
 	y_test,pred_test=NN(final,300,50,ticker,"Doc2vec")
-	Y=open("../data/graph/"+ticker+'/Y_test.txt','w')
-	P=open("../data/graph/"+ticker+'/partpred_test.txt','w')
-	Y.write(y_test)
-	P.write(pred_test)
-	Y.close()
-	P.close()
-
+	Y=pd.DataFrame(y_test)
+	Y.to_csv("../data/graph/"+ticker+"/y_test.csv")
+	P=pd.DataFrame(pred_test)
+	P.to_csv("../data/graph/"+ticker+'/allpred_test.csv')
 
 
 def NN(df,fir,sec,ticker,folder):
