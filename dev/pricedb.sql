@@ -11,3 +11,11 @@ date date NOT NULL
 ):
 
 INSERT INTO stock_data VALUES ('AAPL', 100, STR_TO_DATE('2/1/08','%e/%c/%y'))
+
+
+CREATE TABLE common_data (
+SPX decimal(10,10) NULL,
+NYSEVOL decimal(10,10) NULL,
+CCMP decimal(10,10) NULL,
+date date NOT NULL
+);
