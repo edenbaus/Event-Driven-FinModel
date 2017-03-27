@@ -20,12 +20,12 @@ def db_get_ticker(ticker):
     t = ticker
     cols = ['ticker', 'closer', 'date']
 
-    db_host = 'localhost'
-    db_user = 'scottdb'
+    db_host = '216.230.228.88:3306'
+    db_user = 'bc8_scottede'#scottdb'
     db_name = 'securities'
     db_pass = 'nycdsa'
-    con = mdb.connect(host = db_host, user = db_user, passwd = db_pass, db=db_name)
-
+    #con = mdb.connect(host = db_host, user = db_user, passwd = db_pass, db=db_name)
+    con = mdb.connect(host = db_host, user = db_user, db=db_name)
     query = ("SELECT * FROM stock_data WHERE ticker = '%s'" % (t))
     df = sql.read_sql(query, con=con)
     print "grabbing stock data for %s" % (t)

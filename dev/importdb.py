@@ -24,7 +24,7 @@ import datetime as dt
 #            print( "INSERT INTO common_data VALUES " + insert_str )
 
 def db_send(df):
-    db_host = 'localhost'
+    db_host = 'betapi.local'
     db_user = 'scottdb'
     db_pass = 'nycdsa'
     db_name = 'securities'

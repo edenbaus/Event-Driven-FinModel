@@ -5,13 +5,13 @@ import datetime as dt
 
 
 def db_send_common():
-    db_host = '216.230.228.88'
-    db_user = 'bc8_scottede'#'scottdb'
-    db_pass = ''#'nycdsa'
-    db_name = 'bc8_scottede_db'#'securities'
-   # con = mdb.connect(host=db_host, user=db_user, passwd=db_pass, db=db_name)
+    db_host = 'betapi.local'
+    db_user = 'scottdb'#'scottdb'
+    db_pass = 'nycdsa'#'nycdsa'
+    db_name = 'securities'#'securities'
+    con = mdb.connect(host=db_host, user=db_user, passwd=db_pass, db=db_name)
 
-    con = mdb.connect(host=db_host, user=db_user, db=db_name)
+   # con = mdb.connect(host=db_host, user=db_user,passwd=db_pass db=db_name)
     df_ = pd.read_csv('../data/Price/common_data.csv')
     df_.columns = ['date', 'spx', 'nysevol', 'ccmp']
     cols = ['spx', 'nysevol', 'ccmp', 'date']
